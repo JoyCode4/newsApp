@@ -2,8 +2,7 @@ import React, { Component } from "react";
 import NewsItem from "./NewsItem";
 import Spinner from "./Spinner";
 import PropTypes from 'prop-types';
-import NewsImage from  "../assets/images/News.jpg";
-
+import NewsImage from "../assets/images/NewsImage.jpg";
 
 
 export class News extends Component {
@@ -11,7 +10,8 @@ export class News extends Component {
   static defaultProps = {
     country:"in",
     pageSize:9,
-    category:"general"
+    category:"general",
+    API_KEY:"5fd178daa9d84d87a0f119cb25dadff8"
   }
 
   static propTypes = {
@@ -20,32 +20,31 @@ export class News extends Component {
     category:PropTypes.string,
   }
 
-  constructor(props) {
-    super(props);
+  constructor() {
+    super();
     this.state = {
       articles: [],
       loading: false,
       page:1
     };
-    document.title = `NewsApp - ${this.capitalizeFirstLetter(this.props.category)}`;
   }
 
-  async componentDidMount(){
-    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=1d4c908b79e040ae8a0ca6bed20815dd&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+  async updateState(){
+    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${this.props.API_KEY}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
     this.setState({loading:true})
     const res = await fetch(url);
     let data = await res.json();
-    console.log(data.articles);
+    return data;
+  }
+
+  async componentDidMount(){
+    const data = await this.updateState();
     this.setState({articles:data.articles, totalResults:data.totalResults,loading:false});
     
   }
 
   handlePreviousClick= async ()=>{
-    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=1d4c908b79e040ae8a0ca6bed20815dd&page=${this.state.page-1}&pageSize=${this.props.pageSize}`;
-    this.setState({loading:true})
-    const res = await fetch(url);
-    let data = await res.json();
-
+    const data = await this.updateState();
     this.setState({
       page : this.state.page-1,
       articles:data.articles,
@@ -55,11 +54,7 @@ export class News extends Component {
 
   handleNextClick= async()=>{
     if(this.state.page<=Math.ceil(this.state.totalResults/this.props.pageSize)){
-      let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=1d4c908b79e040ae8a0ca6bed20815dd&page=${this.state.page+1}&pageSize=${this.props.pageSize}`;
-      this.setState({loading:true})
-      const res = await fetch(url);
-      let data = await res.json();
-      
+      const data = await this.updateState();
       this.setState({
         page : this.state.page+1,
         articles:data.articles,
@@ -68,14 +63,11 @@ export class News extends Component {
     }
 
   }
-  capitalizeFirstLetter = (string) => {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  }
 
   render() {
     return (
       <div className="container my-5">
-        <h1 className="text-center">{`NewsApp - ${this.capitalizeFirstLetter(this.props.category)} | Top Headlines`}</h1>
+        <h1 className="text-center">{`NewsApp - (${(this.props.category).toUpperCase()}) Top Headlines`}</h1>
         {this.state.loading && <Spinner/>}
         <div className="row my-4">
           {!this.state.loading && this.state.articles.map((article) => {
@@ -96,7 +88,7 @@ export class News extends Component {
         </div>
         <div className="container d-flex justify-content-between">
           <button disabled={this.state.page<=1} type="button" className="btn btn-dark m-3" onClick={this.handlePreviousClick}> &larr; Previous</button>
-          <button disabled={this.state.page>=Math.ceil(this.state.totalResults/this.state.pageSize)} type="button" className="btn btn-dark m-3" onClick={this.handleNextClick}>Next &rarr; </button>
+          <button disabled={this.state.page>=Math.ceil(this.state.totalResults/this.props.pageSize)} type="button" className="btn btn-dark m-3" onClick={this.handleNextClick}>Next &rarr; </button>
         </div>
       </div>
     );
