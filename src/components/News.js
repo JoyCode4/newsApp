@@ -20,17 +20,17 @@ export class News extends Component {
     category:PropTypes.string,
   }
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       articles: [],
       loading: false,
       page:1
     };
+    document.title = `NewsApp - ${this.capitalizeFirstLetter(this.props.category)}`;
   }
 
-  async updateState(){
-    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${this.props.API_KEY}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+  fetchingData = async (url) =>{
     this.setState({loading:true})
     const res = await fetch(url);
     let data = await res.json();
@@ -38,13 +38,14 @@ export class News extends Component {
   }
 
   async componentDidMount(){
-    const data = await this.updateState();
+    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${this.props.API_KEY}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+    let data = await this.fetchingData(url);
     this.setState({articles:data.articles, totalResults:data.totalResults,loading:false});
-    
   }
 
   handlePreviousClick= async ()=>{
-    const data = await this.updateState();
+    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${this.props.API_KEY}&page=${this.state.page-1}&pageSize=${this.props.pageSize}`;
+    let data = await this.fetchingData(url);
     this.setState({
       page : this.state.page-1,
       articles:data.articles,
@@ -54,7 +55,8 @@ export class News extends Component {
 
   handleNextClick= async()=>{
     if(this.state.page<=Math.ceil(this.state.totalResults/this.props.pageSize)){
-      const data = await this.updateState();
+      let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${this.props.API_KEY}&page=${this.state.page+1}&pageSize=${this.props.pageSize}`;
+      let data = await this.fetchingData(url);
       this.setState({
         page : this.state.page+1,
         articles:data.articles,
@@ -64,10 +66,14 @@ export class News extends Component {
 
   }
 
+  capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
   render() {
     return (
       <div className="container my-5">
-        <h1 className="text-center">{`NewsApp - (${(this.props.category).toUpperCase()}) Top Headlines`}</h1>
+        <h1 className="text-center">{`NewsApp - ${this.capitalizeFirstLetter(this.props.category)} |  Top Headlines`}</h1>
         {this.state.loading && <Spinner/>}
         <div className="row my-4">
           {!this.state.loading && this.state.articles.map((article) => {
