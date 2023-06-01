@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import NewsItem from "./NewsItem";
 import Spinner from "./Spinner";
 import PropTypes from 'prop-types';
+import NewsImage from  "../assets/images/News.jpg";
+
 
 
 export class News extends Component {
@@ -18,13 +20,14 @@ export class News extends Component {
     category:PropTypes.string,
   }
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       articles: [],
       loading: false,
       page:1
     };
+    document.title = `NewsApp - ${this.capitalizeFirstLetter(this.props.category)}`;
   }
 
   async componentDidMount(){
@@ -65,11 +68,14 @@ export class News extends Component {
     }
 
   }
+  capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
 
   render() {
     return (
       <div className="container my-5">
-        <h1 className="text-center">NewsApp - Top Headlines</h1>
+        <h1 className="text-center">{`NewsApp - ${this.capitalizeFirstLetter(this.props.category)} | Top Headlines`}</h1>
         {this.state.loading && <Spinner/>}
         <div className="row my-4">
           {!this.state.loading && this.state.articles.map((article) => {
@@ -78,8 +84,11 @@ export class News extends Component {
                 <NewsItem
                     title={article.title?article.title.slice(0,45):""}
                     description={article.description?article.description.slice(0,88):""}
-                    imageUrl={article.urlToImage?article.urlToImage:"https://nypost.com/wp-content/uploads/sites/2/2023/05/newspress-collage-27245877-1685245676865.jpg?quality=75&strip=all&1685231331&w=1024"}
+                    imageUrl={article.urlToImage?article.urlToImage:NewsImage}
                     rm={article.url}
+                    date={new Date(article.publishedAt).toGMTString()}
+                    author={article.author?article.author:"Unknown"}
+                    source={article.source.name}
                 />
               </div>
             )
