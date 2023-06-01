@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 
 export class NewsItem extends Component {
-    constructor(){
-        super();
-    }
+    // constructor(){
+    //     super();
+    // }
   render() {
     let {title,description,imageUrl,rm} = this.props;
     return (
@@ -13,7 +13,7 @@ export class NewsItem extends Component {
                 <div className="card-body">
                     <h5 className="card-title">{title}...</h5>
                     <p className="card-text">{description}...</p>
-                    <a href={rm} target="_blank" className="btn btn-sm btn-primary">Read More</a>
+                    <a rel='noreferrer' href={rm} target="_blank" className="btn btn-sm btn-dark">Read More</a>
                 </div>
             </div>
         </div>
