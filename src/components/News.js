@@ -12,7 +12,6 @@ export class News extends Component {
     country:"in",
     pageSize:9,
     category:"general",
-    API_KEY:"5fd178daa9d84d87a0f119cb25dadff8"
   }
 
   static propTypes = {
@@ -36,13 +35,17 @@ export class News extends Component {
     this.setState({loading:true})
     const res = await fetch(url);
     let data = await res.json();
+    this.props.setProgress(40);
     return data;
   }
 
   async componentDidMount(){
+    this.props.setProgress(10);
     let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${this.props.API_KEY}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
     let data = await this.fetchingData(url);
+    this.props.setProgress(70);
     this.setState({articles:data.articles, totalResults:data.totalResults,loading:false});
+    this.props.setProgress(100);
   }
 
   // handlePreviousClick= async ()=>{
@@ -83,7 +86,6 @@ export class News extends Component {
       totalResults:data.totalResults,
       loading:false
     })
-
   }
   render() {
     return (
@@ -94,14 +96,16 @@ export class News extends Component {
           dataLength={this.state.articles.length}
           next={this.fetchMoreData}
           hasMore={this.state.articles !== this.state.totalResults}
-          loader={this.state.articles.length !== this.state.totalResults?<Spinner/>:console.log()}
+          loader={(this.state.articles.length !== this.state.totalResults)?<Spinner/>:console.log()}
         >
           <div className="container">
             <div className="row my-4">
+              {console.log(this.state.articles.length , this.state.totalResults)}
               {!this.state.loading && this.state.articles.map((article) => {
-                return (
-                  <div className="col-md-4"  key={article.url}>
-                    <NewsItem
+                if(article !== null || article !== undefined){
+                  return (
+                    <div className="col-md-4"  key={article.url}>
+                      <NewsItem
                         title={article.title?article.title.slice(0,45):""}
                         description={article.description?article.description.slice(0,88):""}
                         imageUrl={article.urlToImage?article.urlToImage:NewsImage}
@@ -109,9 +113,11 @@ export class News extends Component {
                         date={new Date(article.publishedAt).toGMTString()}
                         author={article.author?article.author:"Unknown"}
                         source={article.source.name}
-                        />
-                  </div>
-                )
+                      />
+                    </div>
+                  )
+                }
+                return ;
               })}
             </div>
           </div>
