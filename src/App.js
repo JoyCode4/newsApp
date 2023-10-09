@@ -8,7 +8,8 @@ import {
   Route
 } from "react-router-dom";
 import LoadingBar from 'react-top-loading-bar';
-
+// *************** IMPORTANT NOTE ***************
+// it cannot deploy properly because of the API can not all cors to render the API data
 
 const App =() => {
   const pageSize=10;
